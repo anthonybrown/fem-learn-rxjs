@@ -60,6 +60,22 @@
     var $ = document.querySelector.bind(document);
     var $$ = document.querySelectorAll.bind(document);
     var input = $('input');
+    var button = $('button');
+
+    var buttonStream = Rx.Observable.fromEvent(button, 'click');
+
+    buttonStream
+    .buffer(buttonStream.debounce(250))
+    .map(function(buffer) {
+      return buffer.length;
+    })
+    .filter(function(clicks) {
+      return clicks >= 2;
+    })
+    .subscribe(function(clicks) {
+      var h1  = $('.clicks');
+      h1.innerHTML = clicks + 'x clicks!';
+    })
 
     var getUsers = function(name) {
       return fetch('http://localhost:3000/users?name=' + name, {
