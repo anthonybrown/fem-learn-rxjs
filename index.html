@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <script src="node_modules/rx/dist/rx.all.js"></script>
+  <style>
+    body {
+      background-color: #efefef;
+      padding: 150px;
+    }
+
+    body * {
+      box-sizing: border;
+    }
+
+    button {
+      color: white;
+      background-color: red;
+      border: none;
+      outline: none;
+      width: 120px;
+      padding: 10px;
+      text-align: center;
+      text-transform: capitalize;
+      box-sizing: border-box;
+      cursor: pointer;
+      transition: transform .2s ease-in-out;
+    }
+
+    button:active {
+      background-color: crimson;
+    }
+
+    input {
+      background-color: white;
+      border: none;
+      border-radius: 4px;
+      outline: none;
+      font-size: 2rem;
+      height: 80px;
+      color: gray;
+    }
+    .circle {
+      background-color: seagreen;
+      border-radius: 100%;
+      width: 200px;
+      height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="coords"></h1>
+  <h1 class="clicks"></h1>
+  <input type="text" placeholder="type" />
+  <div class="circle" draggable='true'></div>
+  <ul class="list"></ul>
+  <button>click</button>
+
+  <script>
+    var $ = document.querySelector.bind(document);
+    var $$ = document.querySelectorAll.bind(document);
+    var input = $('input');
+
+    var getUsers = function(name) {
+      return fetch('http://localhost:3000/users?name=' + name, {
+        headers: {
+          'ContentType': 'application/json'
+        }
+      })
+      .then(function(res) {
+        return res.json();
+      });
+    };
+
+    var inputStream = Rx.Observable.fromEvent(input, 'keyup');
+
+    inputStream
+    .debounce(500)
+    .map(function(e) {
+      return e.target.value;
+    })
+    .filter(function(value) {
+      return value.length > 4;
+    })
+    .distinctUntilChanged()
+    .flatMap(getUsers)
+    .subscribe(function(value) {
+      console.log(value);
+    });
+
+  </script>
+</body>
+</html>
